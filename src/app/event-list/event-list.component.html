@@ -1,0 +1,19 @@
+<input id="search" type="text" placeholder="Search Events" class="form-control" [(ngModel)]="searchText" />
+<table class="table table-dark" id="events-list">
+  <thead>
+    <tr>
+      <td>Date</td>
+      <td>Event Name</td>
+      <td>Description</td>
+      <td>Remind Before</td>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let event of filteredEventsData">
+      <td>{{ event.date }}</td>
+      <td>{{ event.name }}</td>
+      <td>{{ event.description }}</td>
+      <td>{{ event.remindBefore }}</td>
+    </tr>
+  </tbody>
+</table>

@@ -1,0 +1,37 @@
+<!-- calendar.component.html -->
+<div class="calendar">
+  <div class="header">
+    <button (click)="prevMonth()">&lt;</button>
+    <h1>{{ monthYear }}</h1>
+    <button (click)="nextMonth()">&gt;</button>
+  </div>
+  <div class="days">
+    <div class="day">Sun</div>
+    <div class="day">Mon</div>
+    <div class="day">Tue</div>
+    <div class="day">Wed</div>
+    <div class="day">Thu</div>
+    <div class="day">Fri</div>
+    <div class="day">Sat</div>
+  </div>
+  <div class="dates">
+    <div [ngClass]="appointments[i]?.description ? 'coloredDate' : 'date'" *ngFor="let date of dates; let i = index"
+      (click)="openEventModal(date, i)">{{ date }}
+      <p class="appointmentDetails" class="draggable" draggable="true" (dragstart)="onDragStart($event, i)"
+        (dragover)="onDragOver($event, i)">
+        {{appointments[i]?.description}}</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- event-modal.component.html -->
+<div class="modal event show-modal" *ngIf="modalVisible">
+  <div class="modal-content">
+    <span class="close" (click)="closeEventModal()">&times;</span>
+    <h2>{{ eventDate }}</h2>
+    <textarea class="area" [(ngModel)]="eventDescription"></textarea>
+    <button (click)="saveEvent()">{{
+      appointments[currentIndex]?.description ? 'Update/Delete' : 'Save' }}</button>
+  </div>
+</div>
