@@ -150,15 +150,22 @@ body {
 .appointmentDetails {
   color: green !important;
   margin-left: 20px;
+  width: 100%;
+  text-align: left;
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
 }
 
 .draggable {
-  cursor: move;
+  cursor: pointer;
 }
 
 .coloredDate {
   background-color: #FF5733;
   color: white;
+  cursor: pointer;
+
 }
 
 /* cadetblue */

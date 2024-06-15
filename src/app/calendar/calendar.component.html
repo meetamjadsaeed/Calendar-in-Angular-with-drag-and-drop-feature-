@@ -1,4 +1,3 @@
-<!-- calendar.component.html -->
 <div class="calendar">
   <div class="header">
     <button (click)="prevMonth()">&lt;</button>
@@ -14,18 +13,21 @@
     <div class="day">Fri</div>
     <div class="day">Sat</div>
   </div>
-  <div class="dates">
+  <div class="dates" cdkDropList (cdkDropListDropped)="drop($event)">
     <div [ngClass]="appointments[i]?.description ? 'coloredDate' : 'date'" *ngFor="let date of dates; let i = index"
-      (click)="openEventModal(date, i)">{{ date }}
-      <p class="appointmentDetails" class="draggable" draggable="true" (dragstart)="onDragStart($event, i)"
-        (dragover)="onDragOver($event, i)">
-        {{appointments[i]?.description}}</p>
+      (click)="openEventModal(date, i)">
+      {{ date }}
+      <div class="appointmentDetails" *ngIf="appointments[i]" cdkDrag>
+        <p>{{appointments[i].description}}</p>
+      </div>
+
     </div>
   </div>
 </div>
 
 
-<!-- event-modal.component.html -->
+
+
 <div class="modal event show-modal" *ngIf="modalVisible">
   <div class="modal-content">
     <span class="close" (click)="closeEventModal()">&times;</span>
