@@ -32,9 +32,14 @@ export class CalendarComponent implements OnInit {
   currentIndex: number = 0;
   draggingId: any = 0;
 
+  currentDate = new Date();
+  currentMonthIndex: number = new Date().getMonth();
+  currentYearIndex: number = new Date().getFullYear();
+
   ngOnInit() {
     this.generateCalendar(new Date().getMonth(), new Date().getFullYear());
     this.draggingId = this.generateDraggableId();
+    // console.log(new Date().getMonth());
   }
 
   generateDraggableId() {
@@ -75,26 +80,44 @@ export class CalendarComponent implements OnInit {
     }
   }
 
-  prevMonth() {
-    // Decrease the month by 1
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-    const prevYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-
-    // Generate calendar for the previous month
-    this.generateCalendar(prevMonth, prevYear);
-  }
-
   nextMonth() {
-    // Increase the month by 1
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    const nextMonth = currentMonth === 11 ? 0 : currentMonth + 1;
-    const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
+    const currentMonth = this.currentMonthIndex;
+    const currentYear = this.currentYearIndex;
 
-    // Generate calendar for the next month
-    this.generateCalendar(nextMonth, nextYear);
+    this.currentMonthIndex = (currentMonth + 1) % 12;
+
+    if (currentMonth === 11) {
+      this.currentYearIndex = currentYear + 1;
+    }
+
+    // console.log('nextMonth', this.currentMonthIndex, this.currentYearIndex);
+
+    this.generateCalendar(this.currentMonthIndex, this.currentYearIndex);
+  }
+  prevMonth() {
+    const currentMonth = this.currentMonthIndex;
+    const currentYear = this.currentYearIndex;
+
+    // Ensure not going back beyond the current date
+    const now = new Date();
+    const initialMonth = now.getMonth();
+    const initialYear = now.getFullYear();
+
+    if (currentYear === initialYear && currentMonth === initialMonth) {
+      alert('Cannot go back beyond the current month and year');
+      console.log('Cannot go back beyond the current month and year');
+      return;
+    }
+
+    if (currentMonth === 0) {
+      this.currentMonthIndex = 11;
+      this.currentYearIndex = currentYear - 1;
+    } else {
+      this.currentMonthIndex = currentMonth - 1;
+    }
+
+    // console.log('previousMonth', this.currentMonthIndex, this.currentYearIndex);
+    this.generateCalendar(this.currentMonthIndex, this.currentYearIndex);
   }
 
   openEventModal(date: number, i: number) {
@@ -102,6 +125,7 @@ export class CalendarComponent implements OnInit {
     this.eventDate = `${this.monthYear} ${date}`;
     this.modalVisible = true;
     this.currentIndex = i;
+    this.eventDescription = this.appointments[i]?.description || '';
   }
 
   closeEventModal() {
@@ -113,13 +137,28 @@ export class CalendarComponent implements OnInit {
   saveEvent() {
     console.log('Event saved:', this.eventDate, this.eventDescription);
 
-    // PUSH ON THE BASED ON THE INDEX OF THE DATE
-    this.appointments[this.currentIndex] = {
-      date: this.eventDate,
-      description: this.eventDescription,
-    };
-    this.eventDescription = '';
-    this.modalVisible = false;
+    // before push check if content is empty
+    if (this.eventDescription === '') {
+      const userChoice = confirm('Are you sure you want to delete this event?');
+      if (userChoice) {
+        // PUSH ON THE BASED ON THE INDEX OF THE DATE
+        this.appointments[this.currentIndex] = {
+          date: this.eventDate,
+          description: this.eventDescription,
+        };
+        this.eventDescription = '';
+        this.modalVisible = false;
+      } else {
+        this.modalVisible = false;
+      }
+    } else {
+      this.appointments[this.currentIndex] = {
+        date: this.eventDate,
+        description: this.eventDescription,
+      };
+      this.eventDescription = '';
+      this.modalVisible = false;
+    }
   }
 
   dragEventDetails(currentIndex: number, nextCardIndex: number) {
