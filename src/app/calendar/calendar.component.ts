@@ -11,6 +11,8 @@ import {
   CdkDragDrop,
   moveItemInArray,
   DragDropModule,
+  CdkDropList,
+  CdkDrag,
 } from '@angular/cdk/drag-drop';
 import { Subject, of } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
@@ -30,6 +32,8 @@ import { Appointment, Appointments } from '../interfaces/appointment';
     MatSlideToggleModule,
     MatButtonModule,
     MaterialModule,
+    CdkDropList,
+    CdkDrag,
   ],
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.css'],
@@ -48,6 +52,19 @@ export class CalendarComponent implements OnInit {
   currentYearIndex: number = new Date().getFullYear();
   isFormError: boolean = false;
   formError: string = '';
+  selectedDate: string = '';
+
+  movies = [
+    'Episode I - The Phantom Menace',
+    'Episode II - Attack of the Clones',
+    'Episode III - Revenge of the Sith',
+    'Episode IV - A New Hope',
+    'Episode V - The Empire Strikes Back',
+    'Episode VI - Return of the Jedi',
+    'Episode VII - The Force Awakens',
+    'Episode VIII - The Last Jedi',
+    'Episode IX – The Rise of Skywalker',
+  ];
 
   private destroy$ = new Subject<void>();
 
@@ -253,12 +270,35 @@ export class CalendarComponent implements OnInit {
       )
       .subscribe();
   }
-  drop(event: CdkDragDrop<any[]>) {
-    moveItemInArray(
-      this.appointments[`${this.currentYearIndex}-${this.currentMonthIndex}`],
-      event.previousIndex,
-      event.currentIndex
-    );
+  // drop(event: CdkDragDrop<any[]>) {
+  //   // extract year and month from the eventDate
+
+  //   const [month, date, year] = this.eventDate.split(' ');
+
+  //   moveItemInArray(
+  //     this.appointments[`${year}-${month}`],
+  //     event.previousIndex,
+  //     event.currentIndex
+  //   );
+  // }
+
+  getTempAppointmentsArray(): Appointment[] {
+    const appointmentsKey = `${this.currentYearIndex}-${this.currentMonthIndex}`;
+    return this.appointments[appointmentsKey] || [];
+  }
+
+  drop(event: CdkDragDrop<Appointment[]>) {
+    const appointmentsKey = `${this.currentYearIndex}-${this.currentMonthIndex}`;
+    const tempAppointments = this.getTempAppointmentsArray();
+
+    const movedAppointment = event.item.data;
+
+    tempAppointments.splice(event.previousIndex, 1);
+
+    tempAppointments.splice(event.currentIndex, 0, movedAppointment);
+
+    this.appointments[appointmentsKey] = tempAppointments.slice();
+    moveItemInArray(tempAppointments, event.previousIndex, event.currentIndex);
   }
 
   parseInt(value: string): number {
