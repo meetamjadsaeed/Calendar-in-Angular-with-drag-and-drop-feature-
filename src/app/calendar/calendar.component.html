@@ -14,26 +14,38 @@
     <div class="day">Sat</div>
   </div>
   <div class="dates" cdkDropList (cdkDropListDropped)="drop($event)">
-    <div [ngClass]="appointments[i]?.description ? 'coloredDate' : 'date'" *ngFor="let date of dates; let i = index"
+    <div [ngClass]="getAppointmentForDate(date, i) ? 'coloredDate' : 'date'" *ngFor="let date of dates; let i = index"
       (click)="openEventModal(date, i)">
       {{ date }}
-      <div class="appointmentDetails" *ngIf="appointments[i]" cdkDrag>
-        <p>{{appointments[i].description}}</p>
+      <div class="appointmentDetails" *ngIf="getAppointmentForDate(date, i)" cdkDrag>
+        <p>{{getAppointmentForDate(date, i)?.description}}</p>
       </div>
-
     </div>
   </div>
 </div>
-
-
-
 
 <div class="modal event show-modal" *ngIf="modalVisible">
   <div class="modal-content">
     <span class="close" (click)="closeEventModal()">&times;</span>
     <h2>{{ eventDate }}</h2>
-    <textarea class="area" [(ngModel)]="eventDescription"></textarea>
-    <button (click)="saveEvent()">{{
-      appointments[currentIndex]?.description ? 'Update/Delete' : 'Save' }}</button>
+    <form [formGroup]="calendarForm" (ngSubmit)="onSubmit()">
+      <div>
+        <textarea class="area" id="eventDescription"
+          [ngModel]="getAppointmentForDate(parseInt(eventDate.split(' ')[1]), currentIndex)?.description"
+          formControlName="eventDescription"></textarea>
+        <div
+          *ngIf="calendarForm.get('eventDescription') && calendarForm.get('eventDescription')?.invalid && (calendarForm.get('eventDescription') && calendarForm.get('eventDescription')?.dirty || calendarForm.get('eventDescription') && calendarForm.get('eventDescription')?.touched)">
+          <div *ngIf="isFormError">{{formError}}</div>
+        </div>
+      </div>
+      <button type="submit">
+        {{ getAppointmentForDate(parseInt(eventDate.split(' ')[1]), currentIndex)?.description ? 'Update/Save' : 'Save'
+        }}
+      </button>
+      <button *ngIf="getAppointmentForDate(parseInt(eventDate.split(' ')[1]), currentIndex)?.description" type="button"
+        (click)="deleteEvent()">
+        Delete
+      </button>
+    </form>
   </div>
 </div>
