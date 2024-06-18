@@ -8,10 +8,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { EventListComponent } from './event-list/event-list.component';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 
-import { MatInputModule } from '@angular/material/input';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -25,9 +21,7 @@ import { MatNativeDateModule } from '@angular/material/core';
     DragDropModule,
     // EventFormComponent,
     EventListComponent,
-    MatDatepickerModule,
-    MatInputModule,
-    MatNativeDateModule,
+
     ReactiveFormsModule,
   ],
   templateUrl: './app.component.html',

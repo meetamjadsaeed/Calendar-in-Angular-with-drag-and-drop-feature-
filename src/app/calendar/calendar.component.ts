@@ -12,11 +12,12 @@ import {
   moveItemInArray,
   DragDropModule,
 } from '@angular/cdk/drag-drop';
-import { of } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Subject, of } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { MaterialModule } from '../material/material.module';
+import { Appointment, Appointments } from '../interfaces/appointment';
 
 @Component({
   selector: 'app-calendar',
@@ -28,7 +29,7 @@ import { MatIconModule } from '@angular/material/icon';
     ReactiveFormsModule,
     MatSlideToggleModule,
     MatButtonModule,
-    MatIconModule,
+    MaterialModule,
   ],
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.css'],
@@ -40,28 +41,15 @@ export class CalendarComponent implements OnInit {
   eventDescription: string = '';
   dates: number[] = [];
   modalVisible: boolean = false;
-  appointments: { [key: string]: any[] } = {
-    '2024-7': [
-      {
-        id: 1,
-        date: Date.now,
-        description: 'appointment 1',
-      },
-    ],
-    '2024-8': [
-      {
-        id: 2,
-        date: Date.now,
-        description: 'appointment 2',
-      },
-    ],
-  };
+  appointments: Appointments = {};
   currentIndex: number = 0;
   currentDate = new Date();
   currentMonthIndex: number = new Date().getMonth();
   currentYearIndex: number = new Date().getFullYear();
   isFormError: boolean = false;
   formError: string = '';
+
+  private destroy$ = new Subject<void>();
 
   constructor(private fb: FormBuilder) {}
 
@@ -74,13 +62,22 @@ export class CalendarComponent implements OnInit {
     this.generateCalendar(this.currentMonthIndex, this.currentYearIndex);
   }
 
-  onChanges(): void {
-    this.isFormError = false;
-    this.calendarForm.valueChanges.subscribe((val) => {
-      console.log(val, 'form value');
-    });
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
+  onChanges(): void {
+    this.calendarForm.valueChanges
+      .pipe(
+        map((val) => {
+          console.log(val, 'form value');
+          return val;
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe();
+  }
   getMonthName(month: number): string {
     const monthNames = [
       'January',
@@ -112,8 +109,9 @@ export class CalendarComponent implements OnInit {
     }
   }
 
-  filterAppointments(month: number, year: number): any[] {
-    return this.appointments[`${year}-${month}`] || [];
+  filterAppointments(month: number, year: number): Appointment[] {
+    const key = `${year}-${month}`;
+    return this.appointments[key] || [];
   }
 
   nextMonth() {
@@ -171,28 +169,32 @@ export class CalendarComponent implements OnInit {
   }
 
   saveEvent() {
-    if (this.eventDescription === '') {
-      const userChoice = confirm('Are you sure you want to delete this event?');
-      if (userChoice) {
-        this.appointments[`${this.currentYearIndex}-${this.currentMonthIndex}`][
-          this.currentIndex
-        ] = {
-          id: this.currentIndex,
-          date: this.eventDate,
-          description: this.eventDescription,
-        };
-        this.modalVisible = false;
-      }
-    } else {
-      this.appointments[`${this.currentYearIndex}-${this.currentMonthIndex}`][
-        this.currentIndex
-      ] = {
-        id: this.currentIndex,
-        date: this.eventDate,
-        description: this.eventDescription,
-      };
-      this.modalVisible = false;
-    }
+    of(this.calendarForm.valid)
+      .pipe(
+        map((valid) => {
+          if (valid) {
+            this.appointments[
+              `${this.currentYearIndex}-${this.currentMonthIndex}`
+            ][this.currentIndex] = {
+              id: this.currentIndex,
+              date: this.eventDate,
+              description: this.calendarForm.value.eventDescription,
+            };
+            this.modalVisible = false;
+            this.onReset();
+            console.log('Form Submitted!', this.calendarForm.value);
+          } else {
+            this.isFormError = true;
+            this.getFormError(this.calendarForm.value);
+            console.log(
+              'Form Not Valid',
+              this.calendarForm.controls.eventDescription
+            );
+          }
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe();
   }
 
   onSubmit(): void {
@@ -233,15 +235,24 @@ export class CalendarComponent implements OnInit {
   }
 
   deleteEvent() {
-    const userChoice = confirm('Are you sure you want to delete this event?');
-    if (userChoice) {
-      this.appointments[`${this.currentYearIndex}-${this.currentMonthIndex}`][
-        this.currentIndex
-      ] = { date: '', description: '' };
-      this.modalVisible = false;
-    }
+    of(confirm('Are you sure you want to delete this event?'))
+      .pipe(
+        map((confirmed) => {
+          if (confirmed) {
+            this.appointments[
+              `${this.currentYearIndex}-${this.currentMonthIndex}`
+            ][this.currentIndex] = {
+              id: null,
+              date: '',
+              description: '',
+            };
+            this.modalVisible = false;
+          }
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe();
   }
-
   drop(event: CdkDragDrop<any[]>) {
     moveItemInArray(
       this.appointments[`${this.currentYearIndex}-${this.currentMonthIndex}`],
