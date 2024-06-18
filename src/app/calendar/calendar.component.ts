@@ -14,11 +14,22 @@ import {
 } from '@angular/cdk/drag-drop';
 import { of } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [CommonModule, FormsModule, DragDropModule, ReactiveFormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    DragDropModule,
+    ReactiveFormsModule,
+    MatSlideToggleModule,
+    MatButtonModule,
+    MatIconModule,
+  ],
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.css'],
 })

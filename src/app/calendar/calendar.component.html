@@ -1,8 +1,10 @@
 <div class="calendar">
   <div class="header">
-    <button (click)="prevMonth()">&lt;</button>
+    <button mat-fab extended (click)="prevMonth()">&lt;</button>
     <h1>{{ monthYear }}</h1>
-    <button (click)="nextMonth()">&gt;</button>
+    <button mat-fab extended (click)="nextMonth()">
+      &gt;
+    </button>
   </div>
   <div class="days">
     <div class="day">Sun</div>
@@ -38,11 +40,13 @@
           <div *ngIf="isFormError">{{formError}}</div>
         </div>
       </div>
-      <button type="submit">
+      <button mat-stroked-button type="submit">
         {{ getAppointmentForDate(parseInt(eventDate.split(' ')[1]), currentIndex)?.description ? 'Update/Save' : 'Save'
         }}
       </button>
-      <button *ngIf="getAppointmentForDate(parseInt(eventDate.split(' ')[1]), currentIndex)?.description" type="button"
+
+      <button mat-stroked-button
+        *ngIf="getAppointmentForDate(parseInt(eventDate.split(' ')[1]), currentIndex)?.description" type="button"
         (click)="deleteEvent()">
         Delete
       </button>
