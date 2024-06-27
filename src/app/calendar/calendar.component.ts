@@ -19,7 +19,7 @@ import { map, takeUntil } from 'rxjs/operators';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatButtonModule } from '@angular/material/button';
 import { MaterialModule } from '../material/material.module';
-import { Appointment, Appointments } from '../interfaces/appointment';
+import { Appointment } from '../interfaces/appointment';
 
 @Component({
   selector: 'app-calendar',
@@ -45,7 +45,7 @@ export class CalendarComponent implements OnInit {
   eventDescription: string = '';
   dates: number[] = [];
   modalVisible: boolean = false;
-  appointments: Appointments = {};
+  appointments: Appointment[] = [];
   currentIndex: number = 0;
   currentDate = new Date();
   currentMonthIndex: number = new Date().getMonth();
@@ -95,6 +95,7 @@ export class CalendarComponent implements OnInit {
       )
       .subscribe();
   }
+
   getMonthName(month: number): string {
     const monthNames = [
       'January',
@@ -116,10 +117,6 @@ export class CalendarComponent implements OnInit {
   generateCalendar(month: number, year: number): void {
     this.dates = [];
     this.monthYear = `${this.getMonthName(month)} ${year}`;
-    const key = `${year}-${month}`;
-    if (!this.appointments[key]) {
-      this.appointments[key] = this.filterAppointments(month, year);
-    }
     const numDays = new Date(year, month + 1, 0).getDate();
     for (let i = 1; i <= numDays; i++) {
       this.dates.push(i);
@@ -127,8 +124,11 @@ export class CalendarComponent implements OnInit {
   }
 
   filterAppointments(month: number, year: number): Appointment[] {
-    const key = `${year}-${month}`;
-    return this.appointments[key] || [];
+    return this.appointments.filter(
+      (appointment: Appointment) =>
+        new Date(appointment.date).getMonth() === month &&
+        new Date(appointment.date).getFullYear() === year
+    );
   }
 
   nextMonth() {
@@ -137,8 +137,8 @@ export class CalendarComponent implements OnInit {
       this.currentYearIndex++;
     }
     this.generateCalendar(this.currentMonthIndex, this.currentYearIndex);
-    console.log(this.dates, 'calender dates');
-    console.log(this.appointments, 'calender dates');
+    console.log(this.dates, 'calendar dates');
+    console.log(this.appointments, 'calendar dates');
   }
 
   prevMonth() {
@@ -159,16 +159,15 @@ export class CalendarComponent implements OnInit {
       this.currentMonthIndex--;
     }
     this.generateCalendar(this.currentMonthIndex, this.currentYearIndex);
-    console.log(this.dates, 'calender dates');
-    console.log(this.appointments, 'calender dates');
+    console.log(this.dates, 'calendar dates');
+    console.log(this.appointments, 'calendar dates');
   }
 
-  getAppointmentForDate(date: number, id: number) {
-    const key = `${this.currentYearIndex}-${this.currentMonthIndex}`;
-    const formattedDate = `${this.getMonthName(
-      this.currentMonthIndex
-    )} ${date}, ${this.currentYearIndex}`;
-    return this.appointments[key]?.find((app) => app?.id === id);
+  getAppointmentForDate(date: number, id: number): Appointment | undefined {
+    const formattedDate = `${this.currentYearIndex}-${this.currentMonthIndex}-${date}`;
+    return this.appointments.find(
+      (app: Appointment) => app?.id === id && app?.date === formattedDate
+    );
   }
 
   openEventModal(date: number, i: number) {
@@ -176,8 +175,7 @@ export class CalendarComponent implements OnInit {
     this.modalVisible = true;
     this.currentIndex = i;
     this.eventDescription =
-      this.appointments[`${this.currentYearIndex}-${this.currentMonthIndex}`][i]
-        ?.description || '';
+      this.getAppointmentForDate(date, i)?.description || '';
   }
 
   closeEventModal() {
@@ -190,13 +188,26 @@ export class CalendarComponent implements OnInit {
       .pipe(
         map((valid) => {
           if (valid) {
-            this.appointments[
-              `${this.currentYearIndex}-${this.currentMonthIndex}`
-            ][this.currentIndex] = {
-              id: this.currentIndex,
-              date: this.eventDate,
-              description: this.calendarForm.value.eventDescription,
-            };
+            const formattedDate = `${this.currentYearIndex}-${
+              this.currentMonthIndex
+            }-${this.currentIndex + 1}`;
+            const appointmentIndex = this.appointments.findIndex(
+              (app: Appointment) =>
+                app.date === formattedDate && app.id === this.currentIndex
+            );
+            if (appointmentIndex !== -1) {
+              this.appointments[appointmentIndex] = {
+                id: this.currentIndex,
+                date: formattedDate,
+                description: this.calendarForm.value.eventDescription,
+              };
+            } else {
+              this.appointments.push({
+                id: this.currentIndex,
+                date: formattedDate,
+                description: this.calendarForm.value.eventDescription,
+              });
+            }
             this.modalVisible = false;
             this.onReset();
             console.log('Form Submitted!', this.calendarForm.value);
@@ -216,13 +227,26 @@ export class CalendarComponent implements OnInit {
 
   onSubmit(): void {
     if (this.calendarForm.valid) {
-      this.appointments[`${this.currentYearIndex}-${this.currentMonthIndex}`][
-        this.currentIndex
-      ] = {
-        id: this.currentIndex,
-        date: this.eventDate,
-        description: this.calendarForm.value.eventDescription,
-      };
+      const formattedDate = `${this.currentYearIndex}-${
+        this.currentMonthIndex
+      }-${this.currentIndex + 1}`;
+      const appointmentIndex = this.appointments.findIndex(
+        (app: Appointment) =>
+          app.date === formattedDate && app.id === this.currentIndex
+      );
+      if (appointmentIndex !== -1) {
+        this.appointments[appointmentIndex] = {
+          id: this.currentIndex,
+          date: formattedDate,
+          description: this.calendarForm.value.eventDescription,
+        };
+      } else {
+        this.appointments.push({
+          id: this.currentIndex,
+          date: formattedDate,
+          description: this.calendarForm.value.eventDescription,
+        });
+      }
 
       this.modalVisible = false;
       this.onReset();
@@ -241,7 +265,7 @@ export class CalendarComponent implements OnInit {
     return this.calendarForm.get('eventDescription');
   }
 
-  getFormError({ formData = '' }) {
+  getFormError({ formData = '' }: { formData: string }) {
     if (formData?.length < 5) {
       this.formError = 'Length must be greater than 5';
     }
@@ -256,13 +280,16 @@ export class CalendarComponent implements OnInit {
       .pipe(
         map((confirmed) => {
           if (confirmed) {
-            this.appointments[
-              `${this.currentYearIndex}-${this.currentMonthIndex}`
-            ][this.currentIndex] = {
-              id: null,
-              date: '',
-              description: '',
-            };
+            const formattedDate = `${this.currentYearIndex}-${
+              this.currentMonthIndex
+            }-${this.currentIndex + 1}`;
+            this.appointments = this.appointments.filter(
+              (appointment: Appointment) =>
+                !(
+                  appointment.date === formattedDate &&
+                  appointment.id === this.currentIndex
+                )
+            );
             this.modalVisible = false;
           }
         }),
@@ -270,35 +297,10 @@ export class CalendarComponent implements OnInit {
       )
       .subscribe();
   }
-  // drop(event: CdkDragDrop<any[]>) {
-  //   // extract year and month from the eventDate
-
-  //   const [month, date, year] = this.eventDate.split(' ');
-
-  //   moveItemInArray(
-  //     this.appointments[`${year}-${month}`],
-  //     event.previousIndex,
-  //     event.currentIndex
-  //   );
-  // }
-
-  getTempAppointmentsArray(): Appointment[] {
-    const appointmentsKey = `${this.currentYearIndex}-${this.currentMonthIndex}`;
-    return this.appointments[appointmentsKey] || [];
-  }
 
   drop(event: CdkDragDrop<Appointment[]>) {
-    const appointmentsKey = `${this.currentYearIndex}-${this.currentMonthIndex}`;
-    const tempAppointments = this.getTempAppointmentsArray();
-
-    const movedAppointment = event.item.data;
-
-    tempAppointments.splice(event.previousIndex, 1);
-
-    tempAppointments.splice(event.currentIndex, 0, movedAppointment);
-
-    this.appointments[appointmentsKey] = tempAppointments.slice();
-    moveItemInArray(tempAppointments, event.previousIndex, event.currentIndex);
+    console.log(this.appointments, 'this.appointment');
+    moveItemInArray(this.appointments, event.previousIndex, event.currentIndex);
   }
 
   parseInt(value: string): number {
