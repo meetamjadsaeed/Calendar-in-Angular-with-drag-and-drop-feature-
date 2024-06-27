@@ -13,7 +13,7 @@
     <div class="day">Fri</div>
     <div class="day">Sat</div>
   </div>
-  <div class="dates" cdkDropList (cdkDropListDropped)="drop($event)">
+  <div cdkDropList class="dates" (cdkDropListDropped)="drop($event)">
     <div [ngClass]="getAppointmentForDate(date, i) ? 'coloredDate' : 'date'" *ngFor="let date of dates; let i = index"
       (click)="openEventModal(date, i)">
       {{ date }}
