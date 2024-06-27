@@ -155,7 +155,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
   getAppointmentForDate(date: number, id: number): Appointment | undefined {
     const formattedDate = `${this.currentYearIndex}-${this.currentMonthIndex}-${date}`;
     return this.appointments.find(
-      (app: Appointment) => app?.id === id && app?.date === formattedDate
+      (app: Appointment) => app?.id === id && app?.id === id
     );
   }
 
@@ -252,6 +252,11 @@ export class CalendarComponent implements OnInit, OnDestroy {
         this.calendarForm.controls.eventDescription
       );
     }
+    const dsdsd = this.getAppointmentForDate(
+      parseInt(this.eventDate),
+      this.currentIndex
+    );
+    console.log(dsdsd, 'dsdsddsdsddsdsd');
   }
 
   get eventName() {

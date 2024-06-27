@@ -55,10 +55,8 @@
         {{ getAppointmentForDate(parseInt(eventDate.split(' ')[1]), currentIndex)?.description ? 'Update/Save' : 'Save'
         }}
       </button>
-
-      <button mat-stroked-button
-        *ngIf="getAppointmentForDate(parseInt(eventDate.split(' ')[1]), currentIndex)?.description" type="button"
-        (click)="deleteEvent()">
+      <button mat-stroked-button *ngIf="getAppointmentForDate(parseInt(eventDate.split(' ')[1]), currentIndex)"
+        type="button" (click)="deleteEvent()">
         Delete
       </button>
     </form>
