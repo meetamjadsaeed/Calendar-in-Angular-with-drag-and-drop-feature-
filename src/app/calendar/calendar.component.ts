@@ -297,7 +297,6 @@ export class CalendarComponent implements OnInit, OnDestroy {
   }
 
   drop(event: CdkDragDrop<Appointment[]>) {
-    console.log(this.appointments, 'this.appointment');
     moveItemInArray(this.appointments, event.previousIndex, event.currentIndex);
   }
 
