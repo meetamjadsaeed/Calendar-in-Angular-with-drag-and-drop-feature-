@@ -2,9 +2,7 @@
   <div class="header">
     <button mat-fab extended (click)="prevMonth()">&lt;</button>
     <h1>{{ monthYear }}</h1>
-    <button mat-fab extended (click)="nextMonth()">
-      &gt;
-    </button>
+    <button mat-fab extended (click)="nextMonth()">&gt;</button>
   </div>
   <div class="days">
     <div class="day">Sun</div>
@@ -20,9 +18,8 @@
       (click)="openEventModal(date, i)">
       {{ date }}
       <div class="appointmentDetails" *ngIf="getAppointmentForDate(date, i)" cdkDrag>
-        <p>{{getAppointmentForDate(date, i)?.description}}</p>
-        <p>at {{getAppointmentForDate(date, i)?.time}}</p>
-
+        <p>{{ getAppointmentForDate(date, i)?.description }}</p>
+        <p>at {{ getAppointmentForDate(date, i)?.time }}</p>
       </div>
     </div>
   </div>
@@ -37,22 +34,34 @@
         <textarea class="area" id="eventDescription"
           [ngModel]="getAppointmentForDate(parseInt(eventDate.split(' ')[1]), currentIndex)?.description"
           formControlName="eventDescription"></textarea>
-        <div
-          *ngIf="calendarForm.get('eventDescription') && calendarForm.get('eventDescription')?.invalid && (calendarForm.get('eventDescription') && calendarForm.get('eventDescription')?.dirty || calendarForm.get('eventDescription') && calendarForm.get('eventDescription')?.touched)">
-          <div *ngIf="isFormError">{{formError}}</div>
+        <div *ngIf="
+            calendarForm.get('eventDescription') &&
+            calendarForm.get('eventDescription')?.invalid &&
+            (calendarForm.get('eventDescription')?.dirty ||
+              calendarForm.get('eventDescription')?.touched)
+          ">
+          <div *ngIf="isFormError">{{ formError }}</div>
         </div>
       </div>
       <div>
         <input type="time" id="eventTime"
           [ngModel]="getAppointmentForDate(parseInt(eventDate.split(' ')[1]), currentIndex)?.time"
-          formControlName="eventTime">
-        <div
-          *ngIf="calendarForm.get('eventTime') && calendarForm.get('eventTime')?.invalid && (calendarForm.get('eventTime') && calendarForm.get('eventTime')?.dirty || calendarForm.get('eventTime') && calendarForm.get('eventTime')?.touched)">
-          <div *ngIf="isFormError">{{formError}}</div>
+          formControlName="eventTime" />
+        <div *ngIf="
+            calendarForm.get('eventTime') &&
+            calendarForm.get('eventTime')?.invalid &&
+            (calendarForm.get('eventTime')?.dirty ||
+              calendarForm.get('eventTime')?.touched)
+          ">
+          <div *ngIf="isFormError">{{ formError }}</div>
         </div>
       </div>
       <button mat-stroked-button type="submit">
-        {{ getAppointmentForDate(parseInt(eventDate.split(' ')[1]), currentIndex)?.description ? 'Update/Save' : 'Save'
+        {{
+        getAppointmentForDate(parseInt(eventDate.split(' ')[1]), currentIndex)
+        ?.description
+        ? 'Update/Save'
+        : 'Save'
         }}
       </button>
       <button mat-stroked-button *ngIf="getAppointmentForDate(parseInt(eventDate.split(' ')[1]), currentIndex)"

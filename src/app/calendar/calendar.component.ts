@@ -126,8 +126,6 @@ export class CalendarComponent implements OnInit, OnDestroy {
       this.currentYearIndex++;
     }
     this.generateCalendar(this.currentMonthIndex, this.currentYearIndex);
-    console.log(this.dates, 'calendar dates');
-    console.log(this.appointments, 'calendar dates');
   }
 
   prevMonth() {
@@ -148,8 +146,6 @@ export class CalendarComponent implements OnInit, OnDestroy {
       this.currentMonthIndex--;
     }
     this.generateCalendar(this.currentMonthIndex, this.currentYearIndex);
-    console.log(this.dates, 'calendar dates');
-    console.log(this.appointments, 'calendar dates');
   }
 
   getAppointmentForDate(date: number, id: number): Appointment | undefined {
