@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -38,7 +38,7 @@ import { Appointment } from '../interfaces/appointment';
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.css'],
 })
-export class CalendarComponent implements OnInit {
+export class CalendarComponent implements OnInit, OnDestroy {
   calendarForm: FormGroup;
   monthYear: string = '';
   eventDate: string = '';
@@ -54,18 +54,6 @@ export class CalendarComponent implements OnInit {
   formError: string = '';
   selectedDate: string = '';
 
-  movies = [
-    'Episode I - The Phantom Menace',
-    'Episode II - Attack of the Clones',
-    'Episode III - Revenge of the Sith',
-    'Episode IV - A New Hope',
-    'Episode V - The Empire Strikes Back',
-    'Episode VI - Return of the Jedi',
-    'Episode VII - The Force Awakens',
-    'Episode VIII - The Last Jedi',
-    'Episode IX – The Rise of Skywalker',
-  ];
-
   private destroy$ = new Subject<void>();
 
   constructor(private fb: FormBuilder) {}
@@ -73,6 +61,7 @@ export class CalendarComponent implements OnInit {
   ngOnInit() {
     this.calendarForm = this.fb.group({
       eventDescription: ['', [Validators.required, Validators.minLength(5)]],
+      eventTime: ['', [Validators.required]],
     });
 
     this.onChanges();
@@ -88,7 +77,6 @@ export class CalendarComponent implements OnInit {
     this.calendarForm.valueChanges
       .pipe(
         map((val) => {
-          console.log(val, 'form value');
           return val;
         }),
         takeUntil(this.destroy$)
@@ -137,8 +125,6 @@ export class CalendarComponent implements OnInit {
       this.currentYearIndex++;
     }
     this.generateCalendar(this.currentMonthIndex, this.currentYearIndex);
-    console.log(this.dates, 'calendar dates');
-    console.log(this.appointments, 'calendar dates');
   }
 
   prevMonth() {
@@ -159,14 +145,12 @@ export class CalendarComponent implements OnInit {
       this.currentMonthIndex--;
     }
     this.generateCalendar(this.currentMonthIndex, this.currentYearIndex);
-    console.log(this.dates, 'calendar dates');
-    console.log(this.appointments, 'calendar dates');
   }
 
   getAppointmentForDate(date: number, id: number): Appointment | undefined {
     const formattedDate = `${this.currentYearIndex}-${this.currentMonthIndex}-${date}`;
     return this.appointments.find(
-      (app: Appointment) => app?.id === id && app?.date === formattedDate
+      (app: Appointment) => app?.id === id && app?.id === id
     );
   }
 
@@ -200,24 +184,21 @@ export class CalendarComponent implements OnInit {
                 id: this.currentIndex,
                 date: formattedDate,
                 description: this.calendarForm.value.eventDescription,
+                time: this.calendarForm.value.eventTime,
               };
             } else {
               this.appointments.push({
                 id: this.currentIndex,
                 date: formattedDate,
                 description: this.calendarForm.value.eventDescription,
+                time: this.calendarForm.value.eventTime,
               });
             }
             this.modalVisible = false;
             this.onReset();
-            console.log('Form Submitted!', this.calendarForm.value);
           } else {
             this.isFormError = true;
             this.getFormError(this.calendarForm.value);
-            console.log(
-              'Form Not Valid',
-              this.calendarForm.controls.eventDescription
-            );
           }
         }),
         takeUntil(this.destroy$)
@@ -239,26 +220,27 @@ export class CalendarComponent implements OnInit {
           id: this.currentIndex,
           date: formattedDate,
           description: this.calendarForm.value.eventDescription,
+          time: this.calendarForm.value.eventTime,
         };
       } else {
         this.appointments.push({
           id: this.currentIndex,
           date: formattedDate,
           description: this.calendarForm.value.eventDescription,
+          time: this.calendarForm.value.eventTime,
         });
       }
 
       this.modalVisible = false;
       this.onReset();
-      console.log('Form Submitted!', this.calendarForm.value);
     } else {
       this.isFormError = true;
       this.getFormError(this.calendarForm.value);
-      console.log(
-        'Form Not Valid',
-        this.calendarForm.controls.eventDescription
-      );
     }
+    const dsdsd = this.getAppointmentForDate(
+      parseInt(this.eventDate),
+      this.currentIndex
+    );
   }
 
   get eventName() {
@@ -299,7 +281,6 @@ export class CalendarComponent implements OnInit {
   }
 
   drop(event: CdkDragDrop<Appointment[]>) {
-    console.log(this.appointments, 'this.appointment');
     moveItemInArray(this.appointments, event.previousIndex, event.currentIndex);
   }
 
