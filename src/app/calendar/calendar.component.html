@@ -21,6 +21,8 @@
       {{ date }}
       <div class="appointmentDetails" *ngIf="getAppointmentForDate(date, i)" cdkDrag>
         <p>{{getAppointmentForDate(date, i)?.description}}</p>
+        <p>at {{getAppointmentForDate(date, i)?.time}}</p>
+
       </div>
     </div>
   </div>
@@ -37,6 +39,15 @@
           formControlName="eventDescription"></textarea>
         <div
           *ngIf="calendarForm.get('eventDescription') && calendarForm.get('eventDescription')?.invalid && (calendarForm.get('eventDescription') && calendarForm.get('eventDescription')?.dirty || calendarForm.get('eventDescription') && calendarForm.get('eventDescription')?.touched)">
+          <div *ngIf="isFormError">{{formError}}</div>
+        </div>
+      </div>
+      <div>
+        <input type="time" id="eventTime"
+          [ngModel]="getAppointmentForDate(parseInt(eventDate.split(' ')[1]), currentIndex)?.time"
+          formControlName="eventTime">
+        <div
+          *ngIf="calendarForm.get('eventTime') && calendarForm.get('eventTime')?.invalid && (calendarForm.get('eventTime') && calendarForm.get('eventTime')?.dirty || calendarForm.get('eventTime') && calendarForm.get('eventTime')?.touched)">
           <div *ngIf="isFormError">{{formError}}</div>
         </div>
       </div>

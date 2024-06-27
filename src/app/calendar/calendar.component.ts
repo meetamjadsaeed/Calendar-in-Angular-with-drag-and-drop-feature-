@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -38,7 +38,7 @@ import { Appointment } from '../interfaces/appointment';
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.css'],
 })
-export class CalendarComponent implements OnInit {
+export class CalendarComponent implements OnInit, OnDestroy {
   calendarForm: FormGroup;
   monthYear: string = '';
   eventDate: string = '';
@@ -54,18 +54,6 @@ export class CalendarComponent implements OnInit {
   formError: string = '';
   selectedDate: string = '';
 
-  movies = [
-    'Episode I - The Phantom Menace',
-    'Episode II - Attack of the Clones',
-    'Episode III - Revenge of the Sith',
-    'Episode IV - A New Hope',
-    'Episode V - The Empire Strikes Back',
-    'Episode VI - Return of the Jedi',
-    'Episode VII - The Force Awakens',
-    'Episode VIII - The Last Jedi',
-    'Episode IX – The Rise of Skywalker',
-  ];
-
   private destroy$ = new Subject<void>();
 
   constructor(private fb: FormBuilder) {}
@@ -73,6 +61,7 @@ export class CalendarComponent implements OnInit {
   ngOnInit() {
     this.calendarForm = this.fb.group({
       eventDescription: ['', [Validators.required, Validators.minLength(5)]],
+      eventTime: ['', [Validators.required]],
     });
 
     this.onChanges();
@@ -200,12 +189,14 @@ export class CalendarComponent implements OnInit {
                 id: this.currentIndex,
                 date: formattedDate,
                 description: this.calendarForm.value.eventDescription,
+                time: this.calendarForm.value.eventTime,
               };
             } else {
               this.appointments.push({
                 id: this.currentIndex,
                 date: formattedDate,
                 description: this.calendarForm.value.eventDescription,
+                time: this.calendarForm.value.eventTime,
               });
             }
             this.modalVisible = false;
@@ -239,12 +230,14 @@ export class CalendarComponent implements OnInit {
           id: this.currentIndex,
           date: formattedDate,
           description: this.calendarForm.value.eventDescription,
+          time: this.calendarForm.value.eventTime,
         };
       } else {
         this.appointments.push({
           id: this.currentIndex,
           date: formattedDate,
           description: this.calendarForm.value.eventDescription,
+          time: this.calendarForm.value.eventTime,
         });
       }
 
