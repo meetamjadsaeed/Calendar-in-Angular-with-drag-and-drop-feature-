@@ -77,7 +77,6 @@ export class CalendarComponent implements OnInit, OnDestroy {
     this.calendarForm.valueChanges
       .pipe(
         map((val) => {
-          console.log(val, 'form value');
           return val;
         }),
         takeUntil(this.destroy$)
@@ -197,14 +196,9 @@ export class CalendarComponent implements OnInit, OnDestroy {
             }
             this.modalVisible = false;
             this.onReset();
-            console.log('Form Submitted!', this.calendarForm.value);
           } else {
             this.isFormError = true;
             this.getFormError(this.calendarForm.value);
-            console.log(
-              'Form Not Valid',
-              this.calendarForm.controls.eventDescription
-            );
           }
         }),
         takeUntil(this.destroy$)
@@ -239,20 +233,14 @@ export class CalendarComponent implements OnInit, OnDestroy {
 
       this.modalVisible = false;
       this.onReset();
-      console.log('Form Submitted!', this.calendarForm.value);
     } else {
       this.isFormError = true;
       this.getFormError(this.calendarForm.value);
-      console.log(
-        'Form Not Valid',
-        this.calendarForm.controls.eventDescription
-      );
     }
     const dsdsd = this.getAppointmentForDate(
       parseInt(this.eventDate),
       this.currentIndex
     );
-    console.log(dsdsd, 'dsdsddsdsddsdsd');
   }
 
   get eventName() {
